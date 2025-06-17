@@ -26,8 +26,19 @@
     }
     #card-container {
       position: relative;
-      width: 900px;
-      height: 600px;
+      /*width: 900px;*/
+      /*height: 600px;*/
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-content: center;
+      gap: 12px;
+      padding: 10px;
+      box-sizing: border-box;
+      width: 90vw;
+      height: 60vh;
+      max-width: 900px;
+      max-height: 600px;
       background: linear-gradient(45deg, #ffe4e1, #f8b0c3);
       border-radius: 16px;
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
@@ -35,9 +46,16 @@
       user-select: none;
     }
     .card {
-      position: absolute;
-      width: 120px;
-      height: 210px;
+      /*position: absolute;*/
+      /*width: 120px;*/
+      /*height: 210px;*/
+      position: relative;
+      width: 20vw;
+      max-width: 120px;
+      height: 36vw;
+      max-height: 210px;
+      min-width: 80px;
+      min-height: 140px;
       border: 3px solid #ffd700;
       border-radius: 10px;
       display: flex;
