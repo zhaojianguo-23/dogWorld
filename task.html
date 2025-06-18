@@ -126,6 +126,10 @@
       box-shadow: 0 0 8px #fff;
     }
 
+    button.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
     #password-modal {
       position: fixed;
       top: 0;
@@ -133,8 +137,14 @@
       width: 100%;
       height: 100%;
       z-index: 9999;
-      display: none;
     }
+    .modal-overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
     .modal-content {
       position: absolute;
       top: 50%;
@@ -177,42 +187,139 @@
     .modal-buttons button:hover {
       background: #e055a0;
     }
+
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-content {
+      background-color: #fff5f8;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      min-width: 280px;
+      max-width: 90vw;
+      transform: scale(0.8);
+      transition: transform 0.3s ease;
+    }
+
+    .modal.show .modal-content {
+      transform: scale(1);
+    }
+    /* 在原 CSS 的基础上追加以下内容 */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.5em;
+        text-align: center;
+        padding: 0 10px;
+      }
+
+      #card-container {
+        width: 100%;
+        height: 500px;
+        transform: scale(0.9);
+      }
+
+      .card {
+        width: 90px;
+        height: 160px;
+        font-size: 12px;
+      }
+
+      .button-group {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      button {
+        width: 90%;
+        font-size: 16px;
+      }
+
+      .modal-content {
+        width: 90vw;
+        padding: 15px 20px;
+      }
+
+      .modal-content input {
+        width: 95%;
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 <body>
 <h1>小狗抽取你的专属任务</h1>
 <div id="card-container"></div>
 <p id="status">卡牌任务已显示，请耐心等待洗牌呢...</p>
+<!--<div class="button-group">-->
+<!--  <button id="reset-button">重新抽取</button>-->
+<!--  <button id="challenge-button">觉得不够刺激？点我试试看！</button>-->
+<!--  <button id="mild-button">想缓一缓？换回温柔任务</button>-->
+<!--</div>-->
+
+<!--<div id="password-modal" class="modal hidden">-->
+<!--  <div class="modal-content">-->
+<!--    <p>请输入口令以解锁刺激任务：</p>-->
+<!--    <input type="text" id="password-input" placeholder="请输入口令">-->
+<!--    <div id="password-error" style="color: red; margin-top: 8px; display: none;">口令错误哦～再想想看！</div>-->
+<!--    <div style="margin-top: 15px;">-->
+<!--      <button id="confirm-password">确认</button>-->
+<!--      <button id="cancel-password">取消</button>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
 <div class="button-group">
   <button id="reset-button">重新抽取</button>
   <button id="challenge-button">觉得不够刺激？点我试试看！</button>
   <button id="mild-button">想缓一缓？换回温柔任务</button>
 </div>
 
-<div id="password-modal">
+<div id="password-modal" class="modal hidden">
   <div class="modal-content">
     <p>请输入口令以解锁刺激任务：</p>
     <input type="text" id="password-input" placeholder="请输入口令">
     <div id="password-error" style="color: red; margin-top: 8px; display: none;">口令错误哦～再想想看！</div>
-    <div class="modal-buttons">
+    <div style="margin-top: 15px;">
       <button id="confirm-password">确认</button>
       <button id="cancel-password">取消</button>
     </div>
   </div>
 </div>
-
 <script>
   const taskPoolA = [
     "完成一项运动挑战", "学习一个新单词", "写一篇日记",
     "帮助他人完成小任务", "整理桌面", "尝试新菜谱",
     "看一部浪漫电影", "写一封感谢信", "散步30分钟", "尝试新爱好"
   ];
+
   const taskPoolB = [
     "在公共场合跳舞15秒", "给暗恋对象发消息", "模仿偶像唱一段歌",
     "大胆穿搭出门拍照", "在社交平台发一句土味情话", "挑战辣到爆的食物",
     "录制一段“沙雕”视频发给朋友", "三分钟自我推销演讲", "赤脚走在公园草地上", "给自己写一封大胆告白信"
   ];
-  const CARD_COUNT = 6;
+
+  const CARD_COUNT = 4;
   const cardContainer = document.getElementById('card-container');
   const status = document.getElementById('status');
   const resetButton = document.getElementById('reset-button');
@@ -225,7 +332,14 @@
 
   function getRandomTasks(taskList, count, excludeList = []) {
     const filtered = taskList.filter(task => !excludeList.includes(task));
-    const shuffled = filtered.sort(() => 0.5 - Math.random());
+    if (filtered.length < count) {
+      throw new Error('任务数量不足');
+    }
+    const shuffled = [...filtered];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
     return shuffled.slice(0, count);
   }
 
@@ -235,7 +349,7 @@
     const selectedTasks = getRandomTasks(taskPool, CARD_COUNT, previousTasks);
     previousTasks = selectedTasks;
 
-    const cols = 3;
+    const cols = 2;
     const gapX = 150;
     const gapY = 230;
     const centerX = cardContainer.clientWidth / 2;
@@ -248,70 +362,96 @@
       card.classList.add('card');
       card.dataset.task = task;
       card.innerHTML = `
-          <div class="card-front">${task}</div>
-          <div class="card-back">?</div>
-        `;
+        <div class="card-front">${task}</div>
+        <div class="card-back">?</div>
+      `;
       const col = index % cols;
       const row = Math.floor(index / cols);
       const x = startX + col * gapX - 60;
       const y = startY + row * gapY - 105;
       card.style.left = `${x}px`;
       card.style.top = `${y}px`;
+      card.style.transform = `rotateY(0deg)`;
       cardContainer.appendChild(card);
       cards.push(card);
     });
 
     resetButton.style.display = 'none';
     status.textContent = '本次任务已显示，请小狗耐心等待任务打乱呢...';
-    setTimeout(() => shuffleCards(), 2000);
+    setTimeout(() => shuffleCards(), 3000);
   }
 
-  function shuffleCards() {
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  async function shuffleCards() {
+    status.textContent = '打乱中...嘟嘟嘟';
+    const shuffleTimes = 15;
+    const shuffleRadius = 120;
     const centerX = cardContainer.clientWidth / 2;
     const centerY = cardContainer.clientHeight / 2;
 
-    cards.forEach((card, idx) => {
-      const angle = Math.random() * 2 * Math.PI;
-      const r = 150;
-      const x = centerX + r * Math.cos(angle) - 60;
-      const y = centerY + r * Math.sin(angle) - 105;
-      const rot = (Math.random() * 120) - 60;
-      card.style.transition = 'transform 0.4s ease, left 0.4s ease, top 0.4s ease';
-      card.style.left = `${x}px`;
-      card.style.top = `${y}px`;
-      card.style.transform = `rotate(${rot}deg) rotateY(0deg)`;
-    });
-
-    setTimeout(() => {
-      cards.forEach((card, idx) => {
-        card.style.transition = 'transform 0.5s ease, left 0.5s ease, top 0.5s ease';
-        const cols = 3;
-        const gapX = 150;
-        const gapY = 230;
-        const startX = centerX - (cols - 1) * gapX / 2;
-        const startY = centerY - Math.floor((CARD_COUNT - 1) / cols) * gapY / 2;
-        const col = idx % cols;
-        const row = Math.floor(idx / cols);
-        const x = startX + col * gapX - 60;
-        const y = startY + row * gapY - 105;
+    for (let i = 0; i < shuffleTimes; i++) {
+      cards.forEach(card => {
+        const angle = Math.random() * 2 * Math.PI;
+        const r = shuffleRadius * (0.5 + Math.random() * 0.5);
+        const x = centerX + r * Math.cos(angle) - 60;
+        const y = centerY + r * Math.sin(angle) - 105;
+        const rot = (Math.random() * 120) - 60;
+        card.style.transition = 'transform 0.3s ease, left 0.3s ease, top 0.3s ease';
         card.style.left = `${x}px`;
         card.style.top = `${y}px`;
-        card.style.transform = `rotateY(180deg)`;
-        card.classList.add('flipped');
-        card.addEventListener('click', () => {
-          if (!card.classList.contains('flipped')) return;
-          card.classList.remove('flipped');
-          card.style.transform = `rotateY(0deg)`;
-          card.style.zIndex = 3;
-          status.textContent = `你抽到的任务是：${card.dataset.task}`;
-          cards.forEach(c => c.style.pointerEvents = 'none');
-          resetButton.style.display = 'block';
-        }, { once: true });
+        card.style.transform = `rotate(${rot}deg) rotateY(0deg)`;
+        card.style.pointerEvents = 'none';
       });
-      status.textContent = '洗牌完成咯，小狗抽一张卡试试看吧！';
-    }, 1000);
+      await new Promise(r => setTimeout(r, 300));
+    }
+
+    const cols = 2;
+    const gapX = 150;
+    const gapY = 230;
+    const startX = centerX - (cols - 1) * gapX / 2;
+    const startY = centerY - Math.floor((CARD_COUNT - 1) / cols) * gapY / 2;
+
+    const shuffledCards = shuffleArray([...cards]);
+    cardContainer.innerHTML = '';
+    shuffledCards.forEach((card, idx) => {
+      const col = idx % cols;
+      const row = Math.floor(idx / cols);
+      const x = startX + col * gapX - 60;
+      const y = startY + row * gapY - 105;
+      card.classList.add('flipped');
+      card.style.transition = 'transform 0.5s ease, left 0.5s ease, top 0.5s ease';
+      card.style.left = `${x}px`;
+      card.style.top = `${y}px`;
+      card.style.transform = `rotateY(180deg)`;
+      card.style.pointerEvents = 'auto';
+      cardContainer.appendChild(card);
+    });
+    cards = shuffledCards;
+    status.textContent = '洗牌完成咯，小狗抽一张卡试试看吧！';
+    enableCardSelection();
   }
 
+  function enableCardSelection() {
+    cards.forEach(card => {
+      card.addEventListener('click', () => {
+        if (!card.classList.contains('flipped')) return;
+        card.classList.remove('flipped');
+        card.style.transition = 'transform 0.6s ease';
+        card.style.transform = `rotateY(0deg)`;
+        card.style.zIndex = '3';
+        status.textContent = `你抽到的任务是：${card.dataset.task}`;
+        cards.forEach(c => c.style.pointerEvents = 'none');
+        resetButton.style.display = 'block';
+      }, { once: true });
+    });
+  }
   function setActiveButton(activeBtn) {
     [challengeButton, mildButton].forEach(btn => {
       if (btn === activeBtn) {
@@ -321,52 +461,59 @@
       }
     });
   }
-
-  resetButton.addEventListener('click', () => {
-    initCards(currentTaskPool);
-  });
-
-  mildButton.addEventListener('click', function () {
-    if (this.classList.contains('active')) return;
-    currentTaskPool = taskPoolA;
-    setActiveButton(mildButton);
-    initCards(currentTaskPool);
-  });
-
-  // 口令弹窗
+  // c
   const modal = document.getElementById('password-modal');
   const confirmPassword = document.getElementById('confirm-password');
   const cancelPassword = document.getElementById('cancel-password');
   const passwordInput = document.getElementById('password-input');
   const passwordError = document.getElementById('password-error');
-  const correctPassword = '小狗想要';
 
-  challengeButton.addEventListener('click', () => {
-    if (challengeButton.classList.contains('active')) return;
-    passwordInput.value = '';
+  const correctPassword = '小狗想要'; // 你自定义的口令
+
+  challengeButton.addEventListener('click', function () {
+    if (this.classList.contains('active')) return;
     passwordError.style.display = 'none';
-    modal.style.display = 'block';
+    passwordInput.value = '';
+    modal.classList.remove('hidden');
+    setTimeout(() => modal.classList.add('show'), 10);
   });
 
   cancelPassword.addEventListener('click', () => {
-    modal.style.display = 'none';
+    modal.classList.remove('show');
+    setTimeout(() => modal.classList.add('hidden'), 300);
   });
 
   confirmPassword.addEventListener('click', () => {
     const entered = passwordInput.value.trim();
     if (entered === correctPassword) {
-      modal.style.display = 'none';
+      passwordError.style.display = 'none';
+      modal.classList.remove('show');
+      setTimeout(() => modal.classList.add('hidden'), 300);
       currentTaskPool = taskPoolB;
-      setActiveButton(challengeButton);
+      setActiveButton(challengeButton); // 添加这行
       initCards(currentTaskPool);
+      passwordInput.value = '';
     } else {
       passwordError.style.display = 'block';
     }
   });
-
   window.onload = () => {
     setActiveButton(mildButton);
     initCards(currentTaskPool);
+    resetButton.addEventListener('click', () => {
+      initCards(currentTaskPool);
+    });
+    // challengeButton.addEventListener('click', () => {
+    //   document.getElementById('password-modal').style.display = 'block';
+    //   document.getElementById('password-input').value = '';
+    //   document.getElementById('password-error').style.display = 'none';
+    // });
+    mildButton.addEventListener('click', function () {
+      if (this.classList.contains('active')) return;
+      currentTaskPool = taskPoolA;
+      setActiveButton(mildButton);
+      initCards(currentTaskPool);
+    });
   };
 </script>
 </body>
