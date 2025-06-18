@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>小狗的任务</title>
+  <title>命运塔罗牌</title>
   <style>
     body {
       font-family: 'Times New Roman', serif;
@@ -145,27 +145,15 @@
       background: rgba(0, 0, 0, 0.6);
     }
 
-    .modal-content {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #fff0f5;
-      color: #4b2e39;
-      padding: 20px 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 20px rgba(255, 192, 203, 0.5);
-      text-align: center;
-      width: 300px;
-    }
 
     .modal-content input {
-      width: 90%;
-      padding: 8px;
+      width: 100%;
+      padding: 10px;
       margin-top: 10px;
-      border-radius: 5px;
-      border: 1px solid #ffb6c1;
       font-size: 16px;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+      box-sizing: border-box;
     }
 
     .modal-buttons {
@@ -190,10 +178,10 @@
 
     .modal {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      width: 100%;
-      height: 100%;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       background: rgba(0, 0, 0, 0.5);
       display: flex;
       align-items: center;
@@ -220,7 +208,18 @@
       transform: scale(0.8);
       transition: transform 0.3s ease;
     }
-
+    .modal-content > div {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 16px;
+      gap: 12px;
+    }
+    .modal-content button {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+    }
     .modal.show .modal-content {
       transform: scale(1);
     }
@@ -260,6 +259,10 @@
         width: 90vw;
         padding: 15px 20px;
       }
+      .modal-content {
+        width: 90vw;
+        padding: 15px 20px;
+      }
 
       .modal-content input {
         width: 95%;
@@ -269,54 +272,56 @@
   </style>
 </head>
 <body>
-<h1>小狗抽取你的专属任务</h1>
+<h1>欢迎来到小狗世界</h1>
 <div id="card-container"></div>
-<p id="status">卡牌任务已显示，请耐心等待洗牌呢...</p>
-<!--<div class="button-group">-->
-<!--  <button id="reset-button">重新抽取</button>-->
-<!--  <button id="challenge-button">觉得不够刺激？点我试试看！</button>-->
-<!--  <button id="mild-button">想缓一缓？换回温柔任务</button>-->
-<!--</div>-->
-
-<!--<div id="password-modal" class="modal hidden">-->
-<!--  <div class="modal-content">-->
-<!--    <p>请输入口令以解锁刺激任务：</p>-->
-<!--    <input type="text" id="password-input" placeholder="请输入口令">-->
-<!--    <div id="password-error" style="color: red; margin-top: 8px; display: none;">口令错误哦～再想想看！</div>-->
-<!--    <div style="margin-top: 15px;">-->
-<!--      <button id="confirm-password">确认</button>-->
-<!--      <button id="cancel-password">取消</button>-->
-<!--    </div>-->
-<!--  </div>-->
-<!--</div>-->
+<p id="status">卡牌任务已显示，小狗耐心等待洗牌...</p>
 <div class="button-group">
-  <button id="reset-button">重新抽取</button>
-  <button id="challenge-button">觉得不够刺激？点我试试看！</button>
-  <button id="mild-button">想缓一缓？换回温柔任务</button>
+  <button id="reset-button">换一个</button>
+  <button id="challenge-button">🔸「禁忌游戏」</button>
+  <button id="mild-button">🔹「温柔之约」</button>
 </div>
 
 <div id="password-modal" class="modal hidden">
   <div class="modal-content">
     <p>请输入口令以解锁刺激任务：</p>
-    <input type="text" id="password-input" placeholder="请输入口令">
-    <div id="password-error" style="color: red; margin-top: 8px; display: none;">口令错误哦～再想想看！</div>
+    <input type="text" id="password-input" placeholder="想要尝试禁忌吗，试试看吧～">
+    <div id="password-error" style="color: red; margin-top: 8px; display: none;">看样子小狗好像不被允许呢～</div>
     <div style="margin-top: 15px;">
-      <button id="confirm-password">确认</button>
-      <button id="cancel-password">取消</button>
+      <button id="confirm-password">进入</button>
+      <button id="cancel-password">出去</button>
     </div>
   </div>
 </div>
 <script>
   const taskPoolA = [
-    "完成一项运动挑战", "学习一个新单词", "写一篇日记",
-    "帮助他人完成小任务", "整理桌面", "尝试新菜谱",
-    "看一部浪漫电影", "写一封感谢信", "散步30分钟", "尝试新爱好"
+    "在晚上12点之前睡觉", "明天吃早餐", "发一段你梦见我的幻想内容，可以任意发挥，不许害羞",
+    "拍一张你觉得不错的照片", "整理自己的屋子", "说一句你最想在我耳边说的悄悄话，写在便签拍照发来",
+    "拍一张你今天最满意的自拍发来", "一分钟内找一样“你身边可以代表思念的东西”拍照发我", "用10字以内写出你现在的“邪恶小想法”，必须是我专属的",
+    "吐槽(人/事)","讲述一件有趣的事","分享你今天最开心的小瞬间",
+      "画一颗爱心，用奇怪的方式完成它（比如用头发/手）","问我一个你一直没敢问的问题","发一张趴着的照片，说“我是你的乖狗狗",
+    "录一段说“我今天想你了，但没告诉你”的语音","拍你躺在床上的姿势，说“你的位置我留着”","告诉我一个你的小癖好，看我能不能接受",
+          "发一个你手机备忘录里从没给人看过的内容","找一个你生活中最软的东西，说“你不在，我就抱它”","手脚趴地30秒，录个视频或拍照发给主人",
+          "自己叫三声“汪”，每声后说一句“我属你",
+          "录音说：“狗狗今天好乖，想要奖励，舔舔也行","整晚用“狗狗”的身份和主人聊天，不能用“我”，只能说“狗狗”",
+          "语音说一句：“早安主人，狗狗上线了~汪！”并发送","用语音录下3声“汪”，每声不同语气（撒娇、乖巧、渴望）",
+          "发一条信息“今天狗狗最想被主人摸的地方是……","在地上趴好（或床边地面），录音说：“狗狗乖乖趴着等主人来抱。”",
+          "用语音说：“主人，我今天真的很想被夸奖，求求你…”（可自由发挥）","膝跪在床上或地上，双手背后，录音说：“狗狗准备接受命令。”",
+         "主人发命令才能动，说话需以“狗狗请示主人”开头"
   ];
 
   const taskPoolB = [
-    "在公共场合跳舞15秒", "给暗恋对象发消息", "模仿偶像唱一段歌",
-    "大胆穿搭出门拍照", "在社交平台发一句土味情话", "挑战辣到爆的食物",
-    "录制一段“沙雕”视频发给朋友", "三分钟自我推销演讲", "赤脚走在公园草地上", "给自己写一封大胆告白信"
+    "主人出题，念一段“有点羞”的小说片段", "说出目前的穿着，主人选则你脱掉一件后拍照", "裸上身跪坐/趴姿拍照，标注“主人训练中”",
+    "模拟被栓牵绳（用皮带/丝带），做“蹲-站-趴”的视频训练动作",
+    "给自己设一个羞耻惩罚，比如“舔手背10秒+喘气三声”，录音发来",
+    "写“狗狗日记”：今天做了什么，有没有想主人，有没有乱动", "手心写“我是主人的狗”并拍照",
+    "口令快问快答：“狗狗的身份是什么？” “狗狗属于谁？” “狗狗该怎么讨好主人？”（用录音回答）",
+    "跪趴在地，对着镜子录下一段羞耻语音：“我是主人唯一的狗狗，只会对你摇尾巴",
+          "用胸比出爱心的样子拍照","语音说：“主人，狗狗今天好想你……可以给我一点命令吗？不管多羞耻我都服从",
+          "双膝跪地，背挺直，手背后，嘴里含笔/棍状物，说：“狗狗准备好接受处罚了","在镜子前四肢趴地，看着镜子说三遍：“我是主人的狗狗，只为你服务",
+    "在纸上写“我是主人的狗狗”，叼在嘴里拍照（可遮脸）","把一条丝巾/皮带(可以系在脖子上)当成项圈系脖子，说：“我是你的了",
+          "选一种方式自罚（写羞耻句10遍/爬5分钟/冷水敷面），录语音报备：“狗狗认错了，请主人原谅~”","匍匐+狗爬式自拍，发给主人作为“服从证明”",
+          "用语音低声重复3遍：“我是主人的狗狗，只听你的话” + 2声喘息","用舌头舔自己的手背，并录视频说：“狗狗在舔主人的手~”"
+
   ];
 
   const CARD_COUNT = 4;
@@ -377,7 +382,7 @@
     });
 
     resetButton.style.display = 'none';
-    status.textContent = '本次任务已显示，请小狗耐心等待任务打乱呢...';
+    status.textContent = '本次命运已生成，请耐心小狗等待...';
     setTimeout(() => shuffleCards(), 3000);
   }
 
@@ -390,7 +395,7 @@
   }
 
   async function shuffleCards() {
-    status.textContent = '打乱中...嘟嘟嘟';
+    status.textContent = '命运之牌打乱中....';
     const shuffleTimes = 15;
     const shuffleRadius = 120;
     const centerX = cardContainer.clientWidth / 2;
@@ -434,7 +439,7 @@
       cardContainer.appendChild(card);
     });
     cards = shuffledCards;
-    status.textContent = '洗牌完成咯，小狗抽一张卡试试看吧！';
+    status.textContent = '命运纸牌已出现，小狗抽一张试试看吧！';
     enableCardSelection();
   }
 
@@ -446,7 +451,7 @@
         card.style.transition = 'transform 0.6s ease';
         card.style.transform = `rotateY(0deg)`;
         card.style.zIndex = '3';
-        status.textContent = `你抽到的任务是：${card.dataset.task}`;
+        status.textContent = `哇，你抽到的任务是：${card.dataset.task}`;
         cards.forEach(c => c.style.pointerEvents = 'none');
         resetButton.style.display = 'block';
       }, { once: true });
@@ -503,11 +508,7 @@
     resetButton.addEventListener('click', () => {
       initCards(currentTaskPool);
     });
-    // challengeButton.addEventListener('click', () => {
-    //   document.getElementById('password-modal').style.display = 'block';
-    //   document.getElementById('password-input').value = '';
-    //   document.getElementById('password-error').style.display = 'none';
-    // });
+
     mildButton.addEventListener('click', function () {
       if (this.classList.contains('active')) return;
       currentTaskPool = taskPoolA;
